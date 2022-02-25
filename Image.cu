@@ -1,45 +1,45 @@
 //
 // Created by Sofy on 25/02/2022.
 //
-
+/*
 #include "Image.cuh"
 
 __host__ Image::Image(int width, int height) {
     this->width = width;
     this->height = height;
 
-    host_image = (int*) malloc(width*height*sizeof(int));
-    dev_image = nullptr;
+    hostImage = (int *) malloc(width * height * sizeof(int));
 
-    generateImage();
-}
-
-__host__ Image::~Image() {
-    delete(host_image);
-    if(dev_image != nullptr)
-        cudaFree(dev_image);
-}
-
-__host__ void Image::generateImage() {
     for(int i = 0; i < width * height; i++)
-        host_image[i] = rand() % 100;
+        hostImage[i] = rand() % 10;
+
+    devImage = nullptr;
 }
 
-__host__ void Image::copyHostToDeviceImage() {
-    cudaMalloc((void**) &dev_image, width*height*sizeof(int));
-    cudaMemcpy(dev_image, host_image, width*height*sizeof(int), cudaMemcpyHostToDevice);
+__host__ Image::Image(const Image &original) {
+    this->width = original.width;
+    this->height = original.height;
+    hostImage = (int *) malloc(width * height * sizeof(int));
+    for(int i = 0; i < width*height; i++)
+        this->hostImage[i] = original.hostImage[i];
+
+    if(devImage)
+        allocateOnDevice();
+    else
+        devImage = nullptr;
 }
 
-__host__ void Image::copyDeviceToHostImage() {
-    cudaMemcpy(host_image, dev_image, width*height*sizeof(int), cudaMemcpyDeviceToHost);
+
+__host__ void Image::allocateOnDevice() {
+    cudaMalloc((void**) &devImage, sizeof(int)*width*height);
 }
 
-__host__ int * Image::getImage() {
-    return host_image;
+__host__ void Image::print() {
+    for(int i = 0; i < height; i++){
+        for(int j = 0; j < width; j++)
+            printf("%d ", hostImage[i * width + j]);
+        printf("\n");
+    }
 }
 
-__host__ int * Image::getDevImage() {
-    if (dev_image == nullptr)
-        copyHostToDeviceImage();
-    return dev_image;
-}
+*/
