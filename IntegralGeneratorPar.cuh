@@ -9,6 +9,7 @@
 #include "IntegralGenerator.cuh"
 
 __global__ void generateIntegralParV1(int const width, int const height, int const * original, int * result);
+__global__ void generateIntegralParV2(int const width, int const height, int const * original, int * result);
 
 /*
 class IntegralGeneratorPar : public IntegralGenerator {
