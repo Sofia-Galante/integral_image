@@ -5,20 +5,7 @@
 #ifndef INTEGRAL_IMAGE_INTEGRALGENERATORSEQ_CUH
 #define INTEGRAL_IMAGE_INTEGRALGENERATORSEQ_CUH
 
-#include "IntegralGenerator.cuh"
 
-__host__ void generateIntegralSeq(int const width, int const height, int const * original, int * result);
-
-/*
-class IntegralGeneratorSeq : public IntegralGenerator{
-public:
-    explicit IntegralGeneratorSeq(Image& i) : IntegralGenerator(i) {};
-
-    __host__ Image generateIntegral() override;
-
-private:
-    __host__ int calculate(int x, int y);
-};
-*/
+__host__ void generateIntegralCPUseq(int width, int height, int const * original, int * result);
 
 #endif //INTEGRAL_IMAGE_INTEGRALGENERATORSEQ_CUH

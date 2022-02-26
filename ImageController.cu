@@ -9,16 +9,16 @@ __host__ Image allocateOnDevice(Image const &hostImage) {
     devImage.width = hostImage.width;
     devImage.height = hostImage.height;
     cudaMalloc((void**)&devImage.pixels, devImage.width*devImage.height* sizeof(int));
-    fromHostToDevice(hostImage, devImage);
+    copyFromHostToDevice(hostImage, devImage);
     return devImage;
 }
 
-__host__ void fromHostToDevice(const Image &hostImage, Image &devImage) {
+__host__ void copyFromHostToDevice(const Image &hostImage, Image &devImage) {
     assert(hostImage.height == devImage.height && hostImage.width == hostImage.width);
     cudaMemcpy(devImage.pixels, hostImage.pixels, devImage.width*devImage.height* sizeof(int), cudaMemcpyHostToDevice);
 }
 
-__host__ void fromDeviceToHost(Image &hostImage, const Image &devImage) {
+__host__ void copyFromDeviceToHost(Image const &devImage, Image &hostImage) {
     assert(hostImage.height == devImage.height && hostImage.width == hostImage.width);
     cudaMemcpy(hostImage.pixels, devImage.pixels, devImage.width*devImage.height* sizeof(int), cudaMemcpyDeviceToHost);
 }

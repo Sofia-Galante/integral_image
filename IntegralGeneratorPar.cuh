@@ -5,22 +5,13 @@
 #ifndef INTEGRAL_IMAGE_INTEGRALGENERATORPAR_CUH
 #define INTEGRAL_IMAGE_INTEGRALGENERATORPAR_CUH
 
+#include "ImageController.cuh"
 
-#include "IntegralGenerator.cuh"
 
-__global__ void generateIntegralParV1(int const width, int const height, int const * original, int * result);
-__global__ void generateIntegralParV2(int const width, int const height, int const * original, int * result);
+__global__ void generateIntegralGPUglobalMem(int width, int height, int const * original, int * result);
+__global__ void generateIntegralGPUsharedMem(int width, int height, int const * original, int * result);
 
-/*
-class IntegralGeneratorPar : public IntegralGenerator {
-public:
-    explicit IntegralGeneratorPar(Image &i) : IntegralGenerator(i) {};
-
-    __host__ Image generateIntegral() override;
-private:
-
-    __device__ int calculate(int x, int y);
-};
-*/
+__host__ void setUp(Image const &original, Image const &result, Image &dev_original, Image &dev_result);
+__host__ void finish(Image &dev_original, Image &dev_result, Image &result);
 
 #endif //INTEGRAL_IMAGE_INTEGRALGENERATORPAR_CUH

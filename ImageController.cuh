@@ -18,8 +18,8 @@ __host__ Image allocateOnDevice(Image const &hostImage);
 __host__ void freeImageHost(Image &hostImage);
 __host__ void freeImageDev(Image &devImage);
 
-__host__ void fromHostToDevice(Image const &hostImage, Image &devImage);
-__host__ void fromDeviceToHost(Image &hostImage, Image const &devImage);
+__host__ void copyFromHostToDevice(Image const &hostImage, Image &devImage);
+__host__ void copyFromDeviceToHost(Image const &devImage, Image &hostImage);
 
 __host__ void printImage(Image const &image);
 
