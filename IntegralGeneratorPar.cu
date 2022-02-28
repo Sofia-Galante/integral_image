@@ -15,6 +15,10 @@ __host__ void finish(Image &dev_original, Image &dev_result, Image &result){
     freeImageDev(dev_result);
 }
 
+__host__ void findGridAndBlockDim(int width, int height, int &gx, int &gy, int &bx, int &by){
+
+}
+
 
 __global__ void generateIntegralGPUglobalMem(int width, int height, int const * original, int * result){
     int bx = blockIdx.x;
@@ -53,19 +57,18 @@ __global__ void generateIntegralGPUsharedMem(int width, int height, int const * 
     extern __shared__ int sharedOriginal[];
 
     int value = 0;
+    int _row, _col, _x, _y;
 
     for(int _by = 0; _by <= by; _by++){
         for(int _bx = 0; _bx <= bx; _bx++){ //itera tra i blocchi
-            int _row = _by * h + ty;
-            int _col = _bx * w + tx;
+            _row = _by * h + ty;
+            _col = _bx * w + tx;
             if(_col < width && _row < height)
                 sharedOriginal[ty * w + tx] = original[_row * width + _col];
             else
                 sharedOriginal[ty * w + tx] = 0;
             __syncthreads();//ogni thread scrive nella shared memory e poi aspetta
 
-            int _y;
-            int _x;
 
             if(_bx < bx){
                 _x = w-1;

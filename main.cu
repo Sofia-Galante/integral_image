@@ -4,18 +4,31 @@
 
 #include <cstdio>
 #include <ctime>
+#include <chrono>
+#include <cassert>
 
-__host__ Image CPU_sequential(Image const &original){
-    Image result = copyImage(original);
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::milliseconds;
+
+__host__ double CPU_sequential(Image const &original, Image &result){
+    result = copyImage(original);
+
+    auto t1 = high_resolution_clock::now();
     generateIntegralCPUseq(original.width, original.height, original.pixels, result.pixels);
+    auto t2 = high_resolution_clock::now();
 
-    return result;
+    duration<double, std::milli> time = t2 - t1;
+
+    return time.count();
 }
-__host__ Image GPU_globalMem(Image const &original, dim3 grid){
-    Image result = copyImage(original);
+__host__ double GPU_globalMem(Image const &original, Image &result, dim3 grid){
+    result = copyImage(original);
     Image dev_original;
     Image dev_result;
     setUp(original, result, dev_original, dev_result);
+
 
     int x = original.width/grid.x;
     int y = original.height/grid.y;
@@ -25,17 +38,26 @@ __host__ Image GPU_globalMem(Image const &original, dim3 grid){
         y++;
     dim3 block(x, y);
 
+    assert(x*y <= 1024);
+
+
+    auto t1 = high_resolution_clock::now();
     generateIntegralGPUglobalMem<<<grid, block>>>(dev_original.width, dev_original.height, dev_original.pixels, dev_result.pixels);
     cudaDeviceSynchronize();
+    auto t2 = high_resolution_clock::now();
 
     finish(dev_original, dev_result, result);
-    return result;
+
+    duration<double, std::milli> time = t2 - t1;
+
+    return time.count();
 }
-__host__ Image GPU_sharedMem(Image const &original, dim3 grid){
-    Image result = copyImage(original);
+__host__ double GPU_sharedMem(Image const &original, Image &result, dim3 grid){
+    result = copyImage(original);
     Image dev_original;
     Image dev_result;
     setUp(original, result, dev_original, dev_result);
+
 
     int x = original.width/grid.x;
     int y = original.height/grid.y;
@@ -47,23 +69,32 @@ __host__ Image GPU_sharedMem(Image const &original, dim3 grid){
 
     int sharedSize = x*y*sizeof(int);
 
+    assert(x*y <= 1024);
+
+    auto t1 = high_resolution_clock::now();
     generateIntegralGPUsharedMem<<<grid, block, sharedSize>>>(dev_original.width, dev_original.height, dev_original.pixels, dev_result.pixels);
     cudaDeviceSynchronize();
+    auto t2 = high_resolution_clock::now();
 
     finish(dev_original, dev_result, result);
-    return result;
+    duration<double, std::milli> time = t2 - t1;
+
+    return time.count();
 }
 
 int main() {
     srand(time(NULL));
-    Image original = generateImage(20, 40);
+    Image original = generateImage(100, 200);
 
-    Image seq = CPU_sequential(original);
+    Image seq, par1, par2;
+    double s, p1, p2;
+    s = CPU_sequential(original, seq);
 
     dim3 grid(10, 10);
-    Image par1 = GPU_globalMem(original, grid);
-    Image par2 = GPU_sharedMem(original, grid);
+    p1 = GPU_globalMem(original, par1, grid);
+    p2 = GPU_sharedMem(original, par2, grid);
 
+    /*
     printImage(original);
     printf("\n");
     printImage(seq);
@@ -71,6 +102,17 @@ int main() {
     printImage(par1);
     printf("\n");
     printImage(par2);
+    printf("\n");
+    */
+    if(!areTheSame(seq, par1))
+        printf("ERRORE 1\n");
+    if(!areTheSame(seq, par2))
+        printf("ERRORE 2\n");
+    if(!areTheSame(par2, par1))
+        printf("ERRORE 3\n");
+    printf("Tempo impiegato: %f ms\n", s);
+    printf("Tempo impiegato: %f ms\n", p1);
+    printf("Tempo impiegato: %f ms\n", p2);
 
     freeImageHost(original);
     freeImageHost(seq);

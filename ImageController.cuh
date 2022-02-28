@@ -23,5 +23,7 @@ __host__ void copyFromDeviceToHost(Image const &devImage, Image &hostImage);
 
 __host__ void printImage(Image const &image);
 
+__host__ bool areTheSame(Image const &image1, Image const &image2);
+
 
 #endif //INTEGRAL_IMAGE_IMAGECONTROLLER_CUH
