@@ -5,7 +5,7 @@
 #ifndef INTEGRAL_IMAGE_INTEGRALGENERATORPAR_CUH
 #define INTEGRAL_IMAGE_INTEGRALGENERATORPAR_CUH
 
-#include "ImageController.cuh"
+#include "ImageControllerGPU.cuh"
 
 
 __global__ void generateIntegralGPUglobalMem(int width, int height, int const * original, int * result);

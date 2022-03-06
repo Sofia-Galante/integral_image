@@ -3,6 +3,7 @@
 //
 
 #include "IntegralGeneratorPar.cuh"
+#include "cstdio"
 
 __host__ void setUp(Image const &original, Image const &result, Image &dev_original, Image &dev_result){
     dev_original = allocateOnDevice(original);
@@ -16,7 +17,28 @@ __host__ void finish(Image &dev_original, Image &dev_result, Image &result){
 }
 
 __host__ void findGridAndBlockDim(int width, int height, int &gx, int &gy, int &bx, int &by){
+    int k = (width*height)/32;
 
+    if(k > 32)
+        k = 32;
+
+    bx = rand() % width + 4*k;
+
+    while (k*32 % bx != 0) {
+        bx--;
+    }
+
+    by = k*32/bx;
+
+    gx = width/bx;
+    gy = height/by;
+
+    if(gx == 0 || width%bx != 0)
+        gx++;
+    if(gy == 0 || height%by != 0)
+        gy++;
+
+    assert(bx * by <= 1024);
 }
 
 

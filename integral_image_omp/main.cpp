@@ -2,6 +2,8 @@
 #include <ctime>
 #include <chrono>
 #include <cassert>
+#include <fstream>
+
 #include "ImageController.h"
 #include "IntegralGeneratorOMP.h"
 
@@ -21,18 +23,32 @@ double CPU_omp (Image const &original, Image &result){
 
     return time.count();
 }
-int main() {
-    srand(time(NULL));
-    Image original = generateImage(100, 20);
+
+void dimTest(){
+    printf("\n\nTEST 1: CAMBIO DIMENSIONE DELL'IMMAGINE\n");
 
     Image omp;
     double o;
 
-    o = CPU_omp(original, omp);
+    std::ofstream csvFile;
+    csvFile.open ("../../report/test/test1_omp.csv");
+    for(int i = 10; i <= 500; i+=10){
+        printf("\nDimensioni = %d x %d\n", i, i);
+        srand(SEED*i);
+        Image original = generateImage(i, i);
+        o = CPU_omp(original, omp);
 
-    printf("Tempo impiegato: %f ms\n", o);
+        printf("Tempo omp: %f ms\n", o);
 
-    freeImage(original);
-    freeImage(omp);
+        freeImage(original);
+        freeImage(omp);
+
+        csvFile << i*i << ";" << o << "\n";
+    }
+    csvFile.close();
+}
+
+int main() {
+    dimTest();
     return 0;
 }

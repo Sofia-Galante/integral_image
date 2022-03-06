@@ -5,7 +5,7 @@
 #ifndef INTEGRAL_IMAGEOMP_IMAGECONTROLLER_H
 #define INTEGRAL_IMAGEOMP_IMAGECONTROLLER_H
 
-#include "Image.h"
+#include "../Image.h"
 #include <cstdlib>
 #include <cstdio>
 #include <cassert>
