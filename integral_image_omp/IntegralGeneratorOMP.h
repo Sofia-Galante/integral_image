@@ -8,6 +8,6 @@
 #include <omp.h>
 #include <vector>
 
-void generateIntegralCPUomp(int width, int height, int const * original, int * result);
+void generateIntegralCPUomp(int width, int height, int const * original, int * result, int threads1, int threads2);
 
 #endif //INTEGRAL_IMAGEOMP_INTEGRALGENERATOROMP_H

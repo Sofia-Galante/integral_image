@@ -1,0 +1,75 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+
+n = 10
+
+t1_cuda = list()
+t1_omp = list()
+t2_10 = list()
+t2_100 = list()
+t2_1000 = list()
+t2_omp = list()
+t3_cuda = list()
+
+for i in range(n):
+    os.system("integral_image_cuda")
+    os.system("integral_image_omp")
+    t1_cuda.append(pd.read_csv('test1_cuda.csv', names = ['x', 'seq', 'cuda1', 'cuda2'], sep=';'))
+    t1_omp.append(pd.read_csv('test1_omp.csv', names = ['x', 'omp'], sep=';'))
+    t2_10.append(pd.read_csv('test2_10_cuda.csv', names = ['x', 'cuda1', 'cuda2'], sep=';'))
+    t2_100.append(pd.read_csv('test2_100_cuda.csv', names = ['x', 'cuda1', 'cuda2'], sep=';'))
+    t2_1000.append(pd.read_csv('test2_1000_cuda.csv', names = ['x', 'cuda1', 'cuda2'], sep=';'))
+    t2_omp.append(pd.read_csv('test2_omp.csv', names = ['x', 'omp1', 'omp2', 'omp3', 'omp4'], sep=';'))
+    t3_cuda.append(pd.read_csv('test3_cuda.csv', names = ['x', 'cuda1_1', 'cuda2_1', 'cuda1_2', 'cuda2_2', 'cuda1_3', 'cuda2_3'], sep=';'))
+
+t1_cuda = pd.concat(t1_cuda).groupby("x").mean().reset_index()
+t1_omp = pd.concat(t1_omp).groupby("x").mean().reset_index()
+t2_10 = pd.concat(t2_10).groupby("x").mean().reset_index()
+t2_100 = pd.concat(t2_100).groupby("x").mean().reset_index()
+t2_1000 = pd.concat(t2_1000).groupby("x").mean().reset_index()
+t2_omp = pd.concat(t2_omp).groupby("x").mean().reset_index()
+t3_cuda = pd.concat(t3_cuda).groupby("x").mean().reset_index()
+
+t2_10.to_csv('test2_10_cuda.csv', sep=';', header=False, index=False)
+t2_100.to_csv('test2_100_cuda.csv', sep=';', header=False, index=False)
+t2_1000.to_csv('test2_1000_cuda.csv', sep=';', header=False, index=False)
+
+plt.plot(t1_cuda["x"], t1_cuda["seq"], color = 'blue', label = 'sequenziale')
+plt.plot(t1_cuda["x"], t1_cuda["cuda1"], color = 'red', label = 'CUDA - global memory')
+plt.plot(t1_cuda["x"], t1_cuda["cuda2"], color = 'green', label = 'CUDA - shared memory')
+plt.plot(t1_omp["x"], t1_omp["omp"], color = 'purple', label = 'OpenMP')
+plt.yscale('log')
+plt.xlabel("dimensioni immagine (numero di pixel)")
+plt.ylabel("tempo in ms")
+plt.legend(loc="upper left")
+plt.savefig("test1.png")
+plt.show()
+
+plt.plot(t2_omp["x"], t2_omp["omp1"], color = 'blue', label = 'threads = 4 - 4')
+plt.plot(t2_omp["x"], t2_omp["omp2"], color = 'red', label = 'threads = 10 - 10')
+plt.plot(t2_omp["x"], t2_omp["omp3"], color = 'green', label = 'threads = 4 - 10')
+plt.plot(t2_omp["x"], t2_omp["omp4"], color = 'purple', label = 'threads = 10 - 4')
+plt.xlabel("dimensioni immagine (numero di pixel)")
+plt.ylabel("tempo in ms")
+plt.legend(loc="upper left")
+plt.savefig("test2.png")
+plt.show()
+
+plt.plot(t3_cuda["x"], t3_cuda["cuda1_1"], color = 'blue', label = 'threads = 8 x 8')
+plt.plot(t3_cuda["x"], t3_cuda["cuda1_2"], color = 'red', label = 'threads = 16 x 16')
+plt.plot(t3_cuda["x"], t3_cuda["cuda1_3"], color = 'green', label = 'threads = 32 x 32')
+plt.xlabel("dimensioni immagine (numero di pixel)")
+plt.ylabel("tempo in ms")
+plt.legend(loc="upper left")
+plt.savefig("test3_global.png")
+plt.show()
+
+plt.plot(t3_cuda["x"], t3_cuda["cuda2_1"], color = 'blue', label = 'threads = 8 x 8')
+plt.plot(t3_cuda["x"], t3_cuda["cuda2_2"], color = 'red', label = 'threads = 16 x 16')
+plt.plot(t3_cuda["x"], t3_cuda["cuda2_3"], color = 'green', label = 'threads = 32 x 32')
+plt.xlabel("dimensioni immagine (numero di pixel)")
+plt.ylabel("tempo in ms")
+plt.legend(loc="upper left")
+plt.savefig("test3_shared.png")
+plt.show()
