@@ -17,7 +17,4 @@ Image copyImage(Image const &image);
 void freeImage(Image &hostImage);
 
 void printImage(Image const &image);
-
-bool areTheSame(Image const &image1, Image const &image2);
-
 #endif //INTEGRAL_IMAGEOMP_IMAGECONTROLLER_H

@@ -60,14 +60,15 @@ __host__ double GPU_sharedMem(Image const &original, Image &result, dim3 grid, d
     return time.count();
 }
 
-__host__ void dimTest(){
+__host__ void dimTest(std::string const &testName){
     printf("\n\nTEST 1: CAMBIO DIMENSIONE DELL'IMMAGINE\n");
 
-    Image seq, par1, par2;
-    double s, p1, p2;
+    Image seq, par1;
+    double s, p1;
 
     std::ofstream csvFile;
-    csvFile.open ("../../report/test/test1_cuda.csv");
+    std::string filename = "dimTest/cuda/" + testName;
+    csvFile.open (filename);
     for(int size = 10; size <= 500; size+=10){
         printf("\nDimensioni = %d x %d\n", size, size);
         srand(SEED*size);
@@ -78,28 +79,21 @@ __host__ void dimTest(){
         dim3 grid(n, n);
         dim3 block(16, 16);
 
-        p1 = GPU_globalMem(original, par1, grid, block);
-        p2 = GPU_sharedMem(original, par2, grid, block);
-
-        assert(areTheSame(seq, par2));
-        assert(areTheSame(seq, par1));
+        p1 = GPU_sharedMem(original, par1, grid, block);
 
         printf("Tempo sequenziale: %f ms\n", s);
-        printf("Tempo GPU1: %f ms\n", p1);
-        printf("Tempo GPU2: %f ms\n", p2);
+        printf("Tempo GPU: %f ms\n", p1);
 
         freeImageHost(original);
         freeImageHost(seq);
         freeImageHost(par1);
-        freeImageHost(par2);
 
-        csvFile << size*size << ";" << s << ";" << p1 << ";" << p2 << "\n";
+        csvFile << size*size << ";" << s << ";" << p1 << "\n";
     }
     csvFile.close();
 
 }
-
-__host__ void _gridTest(std::string fileName, int d, int GB[4][4]){
+__host__ void gridTest(std::string const &fileName, int d, int GB[4][4]){
     Image original = generateImage(d, d);
 
     Image par1, par2;
@@ -127,7 +121,7 @@ __host__ void _gridTest(std::string fileName, int d, int GB[4][4]){
         freeImageHost(par1);
         freeImageHost(par2);
 
-        csvFile << gx << " x " << gy << " - " << bx << " x " << by << ";" << p1 << ";" << p2 << "\n";
+        csvFile << i << ";" << gx << " x " << gy << " - " << bx << " x " << by << ";" << p1 << ";" << p2 << "\n";
     }
     csvFile.close();
 
@@ -135,8 +129,7 @@ __host__ void _gridTest(std::string fileName, int d, int GB[4][4]){
 
     freeImageHost(original);
 }
-
-__host__ void gridTest1(){
+__host__ void gridTest1(std::string const &testName){
     printf("\n\nTEST 2: CAMBIO DIMENSIONE DELLA GRID - CASI LIMITE\n");
     srand(SEED);
 
@@ -161,12 +154,15 @@ __host__ void gridTest1(){
             {32, 32, 32, 32}, //massimizzare i thread
     };
 
-    _gridTest("../../report/test/test2_10_cuda.csv", 10, GB10);
-    _gridTest("../../report/test/test2_100_cuda.csv", 100, GB100);
-    _gridTest("../../report/test/test2_1000_cuda.csv", 1000, GB1000);
-}
+    std::string filename10 = "gridTest/size10/" + testName;
+    std::string filename100 = "gridTest/size100/" + testName;
+    std::string filename1000 = "gridTest/size1000/" + testName;
 
-__host__ void gridTest2() {
+    gridTest(filename10, 10, GB10);
+    gridTest(filename100, 100, GB100);
+    gridTest(filename1000, 1000, GB1000);
+}
+__host__ void gridTest2(std::string const &testName) {
     printf("\n\nTEST 2: CAMBIO DIMENSIONE DELLA GRID - QUADRATI CON AREA MULTIPLA DI 32\n");
     srand(SEED);
 
@@ -174,7 +170,8 @@ __host__ void gridTest2() {
     double p1_1, p1_2, p1_3, p2_1, p2_2, p2_3;
 
     std::ofstream csvFile;
-    csvFile.open ("../../report/test/test3_cuda.csv");
+    std::string filename = "gridTest/mul32/" + testName;
+    csvFile.open (filename);
     for(int size = 10; size <= 500; size+=10){
         printf("\nDimensioni = %d x %d\n", size, size);
         srand(SEED*size);
@@ -221,9 +218,14 @@ __host__ void gridTest2() {
     csvFile.close();
 }
 
-int main() {
-    dimTest();
-    gridTest1();
-    gridTest2();
+int main(int argc, char *argv[]) {
+    if(argc != 2){
+        printf("Manca il parametro\n");
+        return 1;
+    }
+    std::string testName = argv[1];
+    dimTest(testName);
+    gridTest1(testName);
+    gridTest2(testName);
     return 0;
 }

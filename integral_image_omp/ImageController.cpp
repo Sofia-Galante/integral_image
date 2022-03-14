@@ -44,14 +44,3 @@ void printImage(Image const &image) {
     }
     printf("\n");
 }
-
-bool areTheSame(Image const &image1, Image const &image2){
-    if(image1.width != image2.width)
-        return false;
-    if(image1.height != image2.height)
-        return false;
-    for(int i = 0; i < image1.width*image1.height; i++)
-        if(image1.pixels[i] != image2.pixels[i])
-            return false;
-    return true;
-}

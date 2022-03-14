@@ -16,7 +16,8 @@ __host__ void finish(Image &dev_original, Image &dev_result, Image &result){
     freeImageDev(dev_result);
 }
 
-__global__ void generateIntegralGPUglobalMem(int width, int height, int const * original, int * result){
+__global__ void generateIntegralGPUglobalMem(int width, int height,
+                                             int const * original, int * result){
     int bx = blockIdx.x;
     int by = blockIdx.y;
     int tx = threadIdx.x;
@@ -38,8 +39,6 @@ __global__ void generateIntegralGPUglobalMem(int width, int height, int const * 
 
 __global__ void generateIntegralGPUsharedMem(int width, int height, int const * original, int * result){
     //Utilizzo della shared memory
-
-
     int bx = blockIdx.x;
     int by = blockIdx.y;
     int tx = threadIdx.x;
@@ -49,12 +48,9 @@ __global__ void generateIntegralGPUsharedMem(int width, int height, int const * 
 
     int row = by * h + ty;
     int col = bx * w + tx;
-
     extern __shared__ int sharedOriginal[];
-
     int value = 0;
     int _row, _col, _x, _y;
-
     for(int _by = 0; _by <= by; _by++){
         for(int _bx = 0; _bx <= bx; _bx++){ //itera tra i blocchi
             _row = _by * h + ty;
@@ -65,20 +61,11 @@ __global__ void generateIntegralGPUsharedMem(int width, int height, int const * 
                 sharedOriginal[ty * w + tx] = 0;
             __syncthreads();//ogni thread scrive nella shared memory e poi aspetta
 
+            if(_bx < bx){ _x = w-1;}
+            else{ _x = tx;}
 
-            if(_bx < bx){
-                _x = w-1;
-            }
-            else{
-                _x = tx;
-            }
-
-            if(_by < by){
-                _y = h-1;
-            }
-            else{
-                _y = ty;
-            }
+            if(_by < by){_y = h-1;}
+            else{_y = ty;}
             if(col < width && row < height){
                 for(int y = _y; y >= 0; y--){
                     for(int x = _x; x >= 0; x--){
